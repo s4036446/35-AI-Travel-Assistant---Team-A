@@ -7,7 +7,8 @@
   "scripts": {
     "flight": "node flight-lookup.js",
     "schedule": "node schedule-lookup.js",
-    "test": "node test/schedule-ranking.test.js"
+    "hotel": "node hotel-lookup.js",
+    "test": "node test/schedule-ranking.test.js && node test/hotel-lookup.test.js"
   },
   "engines": {
     "node": ">=18"
