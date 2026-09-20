@@ -171,3 +171,99 @@ SYD→MEL), so `schedule-lookup.js` prints `Aircraft unknown`. Filling that in n
 Also unhandled: `/schedules` is dominated by codeshares (62 of 84 rows on SYD→MEL), so several
 "different" results can be one physical aircraft. Airlabs marks these with `cs_flight_iata`;
 collapsing them is not yet implemented.
+
+
+## StayingAPI Hotel Lookup Proof of Concept
+
+This proof of concept retrieves hotels near a city or airport using StayingAPI. Searches are restricted to Booking.com using `platforms=booking`.
+
+### Setup
+
+1. Install the dependencies:
+
+```bash
+npm install
+```
+
+2. Copy `.env.example` to `.env`.
+
+3. Add a valid StayingAPI key to `.env`:
+
+```env
+STAYINGAPI_KEY=your_actual_api_key
+```
+
+The `.env` file is ignored by Git and must not be committed.
+
+### Usage
+
+Search using a city:
+
+```bash
+npm run hotel -- "Melbourne"
+```
+
+Search using an airport:
+
+```bash
+npm run hotel -- "Sydney Airport"
+```
+
+Change the maximum number of returned hotels:
+
+```bash
+npm run hotel -- "Sibu" --limit 3
+```
+
+Return the mapped result as JSON:
+
+```bash
+npm run hotel -- "Melbourne" --json
+```
+
+### Returned fields
+
+The program maps provider results into a consistent structure containing:
+
+- Hotel ID
+- Name
+- Location
+- Nightly or total price where available
+- Currency
+- Rating where available
+- Booking URL
+- Platform
+
+### Error and pending-response handling
+
+The proof of concept:
+
+- Rejects a missing or invalid destination.
+- Handles unsuccessful API responses with a clear error.
+- Applies a 30-second timeout to individual HTTP requests.
+- Handles StayingAPI `202 Accepted` responses by polling the job endpoint.
+- Stops polling after five minutes if the job does not finish.
+- Displays a clear message when no hotels are returned.
+
+### Testing
+
+The lookup was successfully tested using:
+
+- Melbourne
+- Sydney Airport
+- Sibu
+
+All searches returned three relevant Booking.com properties. Prices and ratings were not included in the tested API responses, so the program displayed `Price unavailable` and `Unavailable` instead of failing.
+
+Run the automated tests with:
+
+```bash
+npm test
+```
+
+### StayingAPI observations
+
+- A live search may initially return `202 Accepted` with a job ID.
+- Pending searches must be polled until they complete.
+- Prices and ratings may not be available in every response.
+- Live searches consume account credits, while polling a submitted job does not require another search.
