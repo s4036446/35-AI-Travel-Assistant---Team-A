@@ -1,0 +1,383 @@
+{
+  "_meta": {
+    "purpose": "Mock airline dataset for Sprint 2 development, closing Gap 2 from the Week 3 schema stress-test (client's real airlines table is placeholder-only in local seed data).",
+    "usage": "This JSON is a readable reference/documentation copy, kept in the team's own repo. It is not loaded directly by any running code, the existing airline feature reads from Postgres, not JSON. The same data is provided as SQL INSERT statements in the companion file seed_mock_airlines.sql, which runs locally only (docker compose up -d yaf-pg) and never touches the client's real production database. See mock-airlines-schema-doc.md Section 0 for the full explanation.",
+    "mirrors": "client repo db/schema.sql, airlines, airline_sub_rules, airline_equipment_rules, airline_equipment_battery_rules, airline_equipment_battery_spare_battery_rules",
+    "notes": [
+      "All airline_name, dimension, and weight values are invented for testing purposes unless otherwise noted in a 'source' field.",
+      "Only existing, frozen equipment_types codes used: wheelchairManual, wheelchairElectric, walker, crutches, electricScooter, powerAttachment.",
+      "Only existing, frozen battery_types codes used: lithiumIon, nonSpillableNickelDry, nonSpillableWet, spillable.",
+      "No new enum rows introduced anywhere in this file.",
+      "airline_name is a plain string in the real schema (not localized) — matches CREATE TABLE definition, not the yaf_localize_column list.",
+      "positive_message / negative_message / attention_message fields ARE localized in the real schema (JSONB {en, ro}) — kept as plain English strings here for readability; Dev to wrap in {\"en\": \"...\"} shape when seeding."
+    ]
+  },
+  "airlines": [
+    {
+      "id": "VJ",
+      "airline_name": "VietJet Air",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Operator of VJ82, live-tested by Wen Bin during Week 3 (flight-lookup.js)",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairElectric",
+              "is_allowed": true,
+              "max_length_cm": 115,
+              "max_width_cm": 122,
+              "max_weight_kg": 150,
+              "positive_message": "Electric wheelchair is allowed in cargo hold.",
+              "negative_message": "Electric wheelchair exceeds airline limits.",
+              "source": "assumed — modelled on client seed.sql example dimensions"
+            },
+            {
+              "equipment_code": "wheelchairManual",
+              "is_allowed": true,
+              "max_length_cm": 115,
+              "max_width_cm": 122,
+              "max_weight_kg": 150,
+              "positive_message": "Manual wheelchair is allowed in cargo hold.",
+              "source": "assumed"
+            }
+          ],
+          "battery_rules": [
+            {
+              "for_equipment_code": "wheelchairElectric",
+              "battery_type_code": "lithiumIon",
+              "max_single_wh": 300,
+              "max_per_item_wh": 160,
+              "max_count": 2,
+              "removable_positive": "Battery can be carried in cabin if protected.",
+              "non_removable_attention": "Battery must be disconnected and secured.",
+              "source": "assumed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MH",
+      "airline_name": "Malaysia Airlines",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Operator of MH2718, live-tested Sprint 1 Week 2 (returned Boeing 737-800)",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairElectric",
+              "is_allowed": true,
+              "max_length_cm": 113,
+              "max_width_cm": 121,
+              "max_weight_kg": 155,
+              "positive_message": "Electric wheelchair is allowed in cargo hold.",
+              "negative_message": "Electric wheelchair exceeds airline limits.",
+              "source": "assumed"
+            },
+            {
+              "equipment_code": "crutches",
+              "is_allowed": true,
+              "max_length_cm": null,
+              "max_width_cm": null,
+              "max_weight_kg": null,
+              "positive_message": "Crutches are allowed in cabin free of charge.",
+              "source": "mirrors client seed.sql crutches example"
+            }
+          ],
+          "battery_rules": [
+            {
+              "for_equipment_code": "wheelchairElectric",
+              "battery_type_code": "spillable",
+              "max_single_wh": null,
+              "max_per_item_wh": null,
+              "max_count": 0,
+              "non_removable_negative": "Spillable batteries must be removed and cannot travel on this aircraft; battery must always remain upright.",
+              "source": "assumed — spillable/liquid battery restriction, matches AC-11 example"
+            },
+            {
+              "for_equipment_code": "wheelchairElectric",
+              "battery_type_code": "lithiumIon",
+              "max_single_wh": 300,
+              "max_per_item_wh": 160,
+              "max_count": 2,
+              "removable_positive": "Battery can be carried in cabin if protected.",
+              "source": "assumed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "JQ",
+      "airline_name": "Jetstar Airways",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Operator of JQ499, live-tested by Wen Bin (flight-lookup.js, returned A321neo)",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairManual",
+              "is_allowed": true,
+              "max_length_cm": 113,
+              "max_width_cm": 121,
+              "max_weight_kg": 150,
+              "positive_message": "Manual wheelchair is allowed in cargo hold.",
+              "source": "assumed"
+            },
+            {
+              "equipment_code": "walker",
+              "is_allowed": true,
+              "max_length_cm": null,
+              "max_width_cm": null,
+              "max_weight_kg": null,
+              "positive_message": "Walker is allowed in cabin free of charge.",
+              "source": "assumed"
+            }
+          ],
+          "battery_rules": []
+        }
+      ]
+    },
+    {
+      "id": "QF",
+      "airline_name": "Qantas Airways",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Seen in Wen Bin's OOL→ADL live schedule-lookup.js test",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairElectric",
+              "is_allowed": true,
+              "max_length_cm": 120,
+              "max_width_cm": 125,
+              "max_weight_kg": 160,
+              "positive_message": "Electric wheelchair is allowed in cargo hold.",
+              "negative_message": "Electric wheelchair exceeds airline limits.",
+              "source": "assumed"
+            },
+            {
+              "equipment_code": "electricScooter",
+              "is_allowed": false,
+              "max_length_cm": null,
+              "max_width_cm": null,
+              "max_weight_kg": null,
+              "negative_message": "Electric scooters are not currently accepted on this airline.",
+              "source": "assumed — deliberate not-compatible example for AC-11 testing"
+            }
+          ],
+          "battery_rules": [
+            {
+              "for_equipment_code": "wheelchairElectric",
+              "battery_type_code": "lithiumIon",
+              "max_single_wh": 300,
+              "max_per_item_wh": 160,
+              "max_count": 2,
+              "removable_positive": "Battery can be carried in cabin if protected.",
+              "source": "assumed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SQ",
+      "airline_name": "Singapore Airlines",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Seen in Wen Bin's OOL→ADL live schedule-lookup.js test",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairManual",
+              "is_allowed": true,
+              "max_length_cm": 115,
+              "max_width_cm": 120,
+              "max_weight_kg": 150,
+              "positive_message": "Manual wheelchair is allowed in cargo hold.",
+              "source": "assumed"
+            },
+            {
+              "equipment_code": "powerAttachment",
+              "is_allowed": true,
+              "max_length_cm": 110,
+              "max_width_cm": 110,
+              "max_weight_kg": 100,
+              "positive_message": "Power attachment is allowed in cargo hold.",
+              "source": "assumed"
+            }
+          ],
+          "battery_rules": [
+            {
+              "for_equipment_code": "powerAttachment",
+              "battery_type_code": "nonSpillableNickelDry",
+              "max_single_wh": 260,
+              "max_per_item_wh": 260,
+              "max_count": 1,
+              "removable_positive": "Non-spillable battery accepted, no special handling required.",
+              "source": "assumed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "VA",
+      "airline_name": "Virgin Australia",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Seen in Wen Bin's OOL→ADL live schedule-lookup.js test",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairElectric",
+              "is_allowed": true,
+              "max_length_cm": 113,
+              "max_width_cm": 121,
+              "max_weight_kg": 150,
+              "positive_message": "Electric wheelchair is allowed in cargo hold.",
+              "negative_message": "Electric wheelchair exceeds airline limits.",
+              "source": "assumed"
+            }
+          ],
+          "battery_rules": [
+            {
+              "for_equipment_code": "wheelchairElectric",
+              "battery_type_code": "nonSpillableWet",
+              "max_single_wh": 300,
+              "max_per_item_wh": 160,
+              "max_count": 2,
+              "removable_positive": "Non-spillable wet battery accepted if securely packed.",
+              "source": "assumed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "QR",
+      "airline_name": "Qatar Airways",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Seen in Wen Bin's OOL→ADL live schedule-lookup.js test",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairManual",
+              "is_allowed": true,
+              "max_length_cm": 118,
+              "max_width_cm": 123,
+              "max_weight_kg": 155,
+              "positive_message": "Manual wheelchair is allowed in cargo hold.",
+              "source": "assumed"
+            },
+            {
+              "equipment_code": "crutches",
+              "is_allowed": true,
+              "max_length_cm": null,
+              "max_width_cm": null,
+              "max_weight_kg": null,
+              "positive_message": "Crutches are allowed in cabin free of charge.",
+              "source": "assumed"
+            }
+          ],
+          "battery_rules": []
+        }
+      ]
+    },
+    {
+      "id": "TO",
+      "airline_name": "Transavia",
+      "icon_url": null,
+      "background_image_url": null,
+      "source": "Matches the client's real seed.sql example airline (real id '3') — included here as a consistency check between mock and real data shapes, NOT to be confused with the real seeded row",
+      "sub_rules": [
+        {
+          "id": "sub_rule_0",
+          "name": "Default rules",
+          "subtitle": null,
+          "display_order": 0,
+          "equipment_rules": [
+            {
+              "equipment_code": "wheelchairElectric",
+              "is_allowed": true,
+              "max_length_cm": 113,
+              "max_width_cm": 121,
+              "max_height_cm": 85,
+              "max_weight_kg": 150,
+              "negative_message": "Electric wheelchair exceeds airline limits.",
+              "source": "matches real client seed.sql values exactly (not assumed)"
+            },
+            {
+              "equipment_code": "wheelchairManual",
+              "is_allowed": true,
+              "max_length_cm": 113,
+              "max_width_cm": 121,
+              "max_height_cm": 85,
+              "max_weight_kg": 150,
+              "positive_message": "Manual wheelchair is allowed in cargo hold.",
+              "negative_message": "Manual wheelchair exceeds airline limits.",
+              "source": "matches real client seed.sql values exactly (not assumed)"
+            },
+            {
+              "equipment_code": "crutches",
+              "is_allowed": true,
+              "max_length_cm": null,
+              "max_width_cm": null,
+              "max_weight_kg": null,
+              "positive_message": "Crutches are allowed in cabin free of charge.",
+              "source": "matches real client seed.sql values exactly (not assumed)"
+            }
+          ],
+          "battery_rules": [
+            {
+              "for_equipment_code": "wheelchairElectric",
+              "battery_type_code": "lithiumIon",
+              "max_single_wh": 300,
+              "max_per_item_wh": 160,
+              "max_count": 2,
+              "removable_positive": "Battery can be carried in cabin if protected.",
+              "non_removable_attention": "Battery must be disconnected and secured.",
+              "source": "matches real client seed.sql values exactly (not assumed)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
